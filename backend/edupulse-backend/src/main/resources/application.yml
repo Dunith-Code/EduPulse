@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: edupulse-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5433/edupulse
+    username: edupulse
+    password: edupulse
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
