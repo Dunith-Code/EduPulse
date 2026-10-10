@@ -1,9 +1,11 @@
 package com.edupulse.student;
 
+import com.edupulse.common.CurrentTenant;
 import com.edupulse.student.StudentService.CreateStudentRequest;
 import com.edupulse.student.StudentService.StudentResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,19 +23,18 @@ public class StudentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public StudentResponse create(@RequestHeader("X-Institute-Id") UUID instituteId,
-                                  @Valid @RequestBody CreateStudentRequest request) {
-        return service.create(instituteId, request);
+    @PreAuthorize("hasRole('INSTITUTE_ADMIN')")
+    public StudentResponse create(@Valid @RequestBody CreateStudentRequest request) {
+        return service.create(CurrentTenant.instituteId(), request);
     }
 
     @GetMapping
-    public List<StudentResponse> list(@RequestHeader("X-Institute-Id") UUID instituteId) {
-        return service.list(instituteId);
+    public List<StudentResponse> list() {
+        return service.list(CurrentTenant.instituteId());
     }
 
     @GetMapping("/{id}")
-    public StudentResponse get(@RequestHeader("X-Institute-Id") UUID instituteId,
-                               @PathVariable UUID id) {
-        return service.get(instituteId, id);
+    public StudentResponse get(@PathVariable UUID id) {
+        return service.get(CurrentTenant.instituteId(), id);
     }
 }

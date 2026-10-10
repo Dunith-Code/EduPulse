@@ -2,8 +2,10 @@ package com.edupulse.batch;
 
 import com.edupulse.batch.BatchService.BatchResponse;
 import com.edupulse.batch.BatchService.CreateBatchRequest;
+import com.edupulse.common.CurrentTenant;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,19 +23,18 @@ public class BatchController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BatchResponse create(@RequestHeader("X-Institute-Id") UUID instituteId,
-                                @Valid @RequestBody CreateBatchRequest request) {
-        return service.create(instituteId, request);
+    @PreAuthorize("hasRole('INSTITUTE_ADMIN')")
+    public BatchResponse create(@Valid @RequestBody CreateBatchRequest request) {
+        return service.create(CurrentTenant.instituteId(), request);
     }
 
     @GetMapping
-    public List<BatchResponse> list(@RequestHeader("X-Institute-Id") UUID instituteId) {
-        return service.list(instituteId);
+    public List<BatchResponse> list() {
+        return service.list(CurrentTenant.instituteId());
     }
 
     @GetMapping("/{id}")
-    public BatchResponse get(@RequestHeader("X-Institute-Id") UUID instituteId,
-                             @PathVariable UUID id) {
-        return service.get(instituteId, id);
+    public BatchResponse get(@PathVariable UUID id) {
+        return service.get(CurrentTenant.instituteId(), id);
     }
 }
