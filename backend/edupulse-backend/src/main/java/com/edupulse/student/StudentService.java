@@ -8,8 +8,11 @@ import jakarta.validation.constraints.Size;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
@@ -51,6 +54,23 @@ public class StudentService {
         return students.findByIdAndInstituteId(studentId, instituteId)
                 .map(this::toResponse)
                 .orElseThrow(() -> new NotFoundException("Student not found: " + studentId));
+    }
+
+    @Transactional(readOnly = true)
+    public StudentResponse getByQrCode(UUID instituteId, String qrCode) {
+        return students.findByQrCodeAndInstituteId(qrCode, instituteId)
+                .map(this::toResponse)
+                .orElseThrow(() -> new NotFoundException(
+                        "Student not found for QR code=" + qrCode + " in institute=" + instituteId));
+    }
+
+    @Transactional(readOnly = true)
+    public Map<UUID, String> namesByIds(UUID instituteId, Collection<UUID> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Map.of();
+        }
+        return students.findByInstituteIdAndIdIn(instituteId, ids).stream()
+                .collect(Collectors.toMap(Student::getId, Student::getFullName, (a, b) -> a));
     }
 
     private StudentResponse toResponse(Student s) {
